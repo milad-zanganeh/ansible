@@ -1,0 +1,5 @@
+---
+# RedHat/CentOS specific variables
+mtail_os: linux
+mtail_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}"
+mtail_download_url: "https://github.com/google/mtail/releases/download/v{{ mtail_version }}/mtail_{{ mtail_version }}_{{ mtail_os }}_{{ mtail_arch }}.tar.gz" 

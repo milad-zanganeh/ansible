@@ -1,0 +1,38 @@
+[Unit]
+Description=mtail log parser
+Documentation=https://github.com/google/mtail
+After=network.target
+
+[Service]
+Type=simple
+User={{ mtail_user }}
+Group={{ mtail_user }}
+ExecStart={{ mtail_bin_dir }}/mtail \
+{% for log in mtail_logs %}
+  -logs {{ log }} \
+{% endfor %}
+  -progs {{ mtail_config_dir }}/progs \
+  -port {{ mtail_metrics_port }} \
+  -log_dir {{ mtail_log_dir }} \
+{% if mtail_emit_prog_label | default(true) %}
+  -emit_prog_label \
+{% endif %}
+{% if mtail_emit_metric_label | default(false) %}
+  -emit_metric_timestamp \
+{% endif %}
+  -logtostderr
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mtail
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{ mtail_log_dir }}
+
+[Install]
+WantedBy=multi-user.target 

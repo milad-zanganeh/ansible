@@ -1,0 +1,12 @@
+---
+- name: restart mtail
+  systemd:
+    name: mtail
+    state: restarted
+    daemon_reload: yes
+
+- name: reload mtail
+  systemd:
+    name: mtail
+    state: reloaded
+    daemon_reload: yes 

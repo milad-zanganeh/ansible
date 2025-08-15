@@ -1,0 +1,23 @@
+---
+- name: Install and configure mtail
+  hosts: all
+  become: yes
+  gather_facts: yes
+  
+  vars:
+    # Customize these variables as needed
+    mtail_logs:
+      - /var/log/nginx/access.log    
+    mtail_progs:
+      - name: nginx_requests
+        content: |
+          counter status_codes by code
+          /^(\S+) \S+ \S+ \[[^]]+\] "\S+ \S+ \S+" (\d{3}) / {
+              code = $2
+              status_codes[$code]++
+          }
+    mtail_metrics_port: 3903
+    mtail_log_level: info
+  
+  roles:
+    - mtail 

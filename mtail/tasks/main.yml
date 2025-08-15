@@ -1,0 +1,98 @@
+---
+- name: Include OS-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  when: ansible_os_family in ['RedHat', 'Debian']
+
+- name: Create mtail user
+  user:
+    name: "{{ mtail_user }}"
+    system: yes
+    shell: /sbin/nologin
+    home: "{{ mtail_home }}"
+    create_home: no
+    state: present
+
+- name: Create mtail directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ mtail_user }}"
+    group: "{{ mtail_user }}"
+    mode: '0755'
+  loop:
+    - "{{ mtail_home }}"
+    - "{{ mtail_config_dir }}"
+    - "{{ mtail_config_dir }}/progs"
+    - "{{ mtail_log_dir }}"
+    - "{{ mtail_bin_dir }}"
+
+- name: Check if mtail binary exists
+  stat:
+    path: "{{ mtail_bin_dir }}/mtail"
+  register: mtail_binary_stat
+
+- name: Create temporary directory for mtail download
+  file:
+    path: /tmp/mtail-download
+    state: directory
+    mode: '0755'
+  when: mtail_force_download | default(false) or not mtail_binary_stat.stat.exists
+
+- name: Download mtail tar.gz
+  get_url:
+    url: "{{ mtail_download_url }}"
+    dest: /tmp/mtail-download/mtail.tar.gz
+    mode: '0644'
+  register: mtail_download
+  when: mtail_force_download | default(false) or not mtail_binary_stat.stat.exists
+
+- name: Extract mtail binary
+  unarchive:
+    src: /tmp/mtail-download/mtail.tar.gz
+    dest: /tmp/mtail-download/
+    remote_src: yes
+  when: mtail_force_download | default(false) or not mtail_binary_stat.stat.exists
+
+- name: Install mtail binary
+  copy:
+    src: /tmp/mtail-download/mtail
+    dest: "{{ mtail_bin_dir }}/mtail"
+    mode: '0755'
+    owner: "{{ mtail_user }}"
+    group: "{{ mtail_user }}"
+    remote_src: yes
+  when: mtail_force_download | default(false) or not mtail_binary_stat.stat.exists
+
+- name: Clean up temporary directory
+  file:
+    path: /tmp/mtail-download
+    state: absent
+  when: mtail_force_download | default(false) or not mtail_binary_stat.stat.exists
+
+- name: Create mtail program files
+  copy:
+    content: "{{ item.content }}"
+    dest: "{{ mtail_config_dir }}/progs/{{ item.name }}.mtail"
+    owner: "{{ mtail_user }}"
+    group: "{{ mtail_user }}"
+    mode: '0644'
+  loop: "{{ mtail_progs }}"
+  notify: restart mtail
+  when: mtail_progs is defined and mtail_progs | length > 0
+
+- name: Create mtail systemd service file
+  template:
+    src: mtail.service.j2
+    dest: /etc/systemd/system/mtail.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart mtail
+
+- name: Enable and start mtail service
+  systemd:
+    name: mtail
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  when: mtail_service_enabled | bool 

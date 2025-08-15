@@ -1,0 +1,26 @@
+---
+mtail_user: mtail
+mtail_home: /var/lib/mtail
+
+mtail_bin_dir: /usr/local/bin
+mtail_config_dir: /etc/mtail
+mtail_log_dir: /var/log/mtail
+
+mtail_config_file: "{{ mtail_config_dir }}/mtail.conf"
+
+mtail_version: "3.0.3"
+mtail_download_url: "https://github.com/google/mtail/releases/download/v{{ mtail_version }}/mtail_{{ mtail_version }}_linux_amd64.tar.gz"
+mtail_force_download: false
+
+mtail_service_enabled: true
+mtail_service_state: started
+
+mtail_logs:
+  - /var/log/nginx/access.log
+  - /var/log/nginx/error.log
+
+mtail_progs: []
+mtail_log_level: info
+mtail_emit_metrics: true
+mtail_emit_prog_label: true
+mtail_emit_metric_label: true 

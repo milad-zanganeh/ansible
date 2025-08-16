@@ -13,7 +13,7 @@ An Ansible role for installing and configuring [mtail](https://github.com/google
 ## Requirements
 
 - Ansible 2.9+
-- Target systems: RHEL/CentOS 7-9, Ubuntu 18.04+, Debian 9+
+- Target systems: RHEL/CentOS, Debian Based Distros
 
 ## Usage
 

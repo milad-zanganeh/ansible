@@ -26,14 +26,14 @@ An Ansible role for installing and configuring [mtail](https://github.com/google
   vars:
     mtail_logs:
       - /var/log/nginx/access.log
-      - /var/log/nginx/error.log
     mtail_progs:
       - name: nginx_requests
         content: |
-          counter requests_total by status
-          /^.* "GET .* HTTP/.*" (\d{3}) / {
-            requests_total[$1]++
-          }
+             counter nginx_status_codes by code
+             
+             /^(\S+) \S+ \S+ \[[^]]+\] "\S+ \S+ \S+" (?P<code>\d{3}) / {
+                 nginx_status_codes[$code]++
+             }
 ```
 
 ## Key Variables

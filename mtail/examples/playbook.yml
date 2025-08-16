@@ -11,10 +11,10 @@
     mtail_progs:
       - name: nginx_requests
         content: |
-          counter status_codes by code
-          /^(\S+) \S+ \S+ \[[^]]+\] "\S+ \S+ \S+" (\d{3}) / {
-              code = $2
-              status_codes[$code]++
+          counter nginx_status_codes by code
+          
+          /^(\S+) \S+ \S+ \[[^]]+\] "\S+ \S+ \S+" (?P<code>\d{3}) / {
+              nginx_status_codes[$code]++
           }
     mtail_metrics_port: 3903
     mtail_log_level: info

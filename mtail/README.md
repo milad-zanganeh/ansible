@@ -46,7 +46,3 @@ An Ansible role for installing and configuring [mtail](https://github.com/google
 ## Example
 
 See `examples/playbook.yml` for a complete usage example.
-
-## License
-
-MIT 
